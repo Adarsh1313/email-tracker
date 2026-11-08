@@ -34,7 +34,7 @@ I built it during a job search. Cold email to founders, hiring managers and recr
 You need Node.js, Chrome, and a free [Cloudflare account](https://dash.cloudflare.com/sign-up).
 
 ```bash
-git clone https://github.com/<you>/email-tracker.git
+git clone https://github.com/Adarsh1313/email-tracker.git
 cd email-tracker
 npm run setup
 ```

@@ -142,4 +142,4 @@ Add engagement signals (reply-over-open status, "Replied (name)", notifications,
 - [ ] 7. Per-recipient pixels: spike, decide, then build or document the limit (prototype built: "Separate" button in compose opens one prefilled draft per recipient, groupId + groupRows core done; awaiting hand test, then wire grouped rows into the dashboard or document the limit)
 - [x] 8. Open-source packaging: `npm run setup`, pre-filled config, optional Gmail sync walkthrough, `npm run demo-data`, manual guide update
 - [x] 9. README (story, screenshots from demo data, comparison, privacy, roadmap), LICENSE (MIT), CONTRIBUTING
-- [ ] 10. Final check from a clean clone, then create the public GitHub repo (only on the owner's go-ahead) (clean-clone install, typecheck, tests, build and demo-data verified; `npm run setup` against Cloudflare and repo creation still pending; history still holds old OAuth client ID, extension key and D1 id)
+- [x] 10. Final check from a clean clone, then create the public GitHub repo (published at https://github.com/Adarsh1313/email-tracker from a fresh single-commit history; `npm run setup` on Cloudflare not yet run)
