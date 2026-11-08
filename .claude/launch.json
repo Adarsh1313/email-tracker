@@ -1,0 +1,39 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "design-system",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173",
+        "--directory",
+        "design"
+      ],
+      "port": 4173
+    },
+    {
+      "name": "dashboard-preview",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4174",
+        "--directory",
+        "extension/dist"
+      ],
+      "port": 4174
+    },
+    {
+      "name": "dashboard-preview-node",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "extension/scripts/serve.mjs",
+        "extension/dist",
+        "4176"
+      ],
+      "port": 4176
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+/* Email Tracker design tokens. Source of truth for every visual value.
+   Direction: Quiet ledger (see design/DESIGN.md). */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Paper and ink (light) ---- */
+  --paper: #f7f4ee;              /* page background, warm off-white */
+  --paper-raised: #fcfaf6;       /* side panel, toast, inputs */
+  --paper-sunken: #efebe3;       /* row hover, skeleton base */
+  --ink: #1c1a17;                /* primary text, inverted chip, primary button */
+  --ink-muted: #5e5a53;          /* secondary text, labels */
+  --ink-faint: #6f6a63;          /* captions, placeholders, untracked (4.8:1 on paper) */
+  --on-ink: #fcfaf6;             /* text on an ink fill */
+  --rule: #e3ddd2;               /* hairline row and section rules */
+  --rule-strong: #cfc8bb;        /* input and secondary-button outlines */
+  --selection-tint: rgb(28 26 23 / 0.055); /* selected row, live-update wash */
+  --hover-tint: rgb(28 26 23 / 0.04);      /* hover on ghost controls and rows */
+  --scrim: rgb(28 26 23 / 0.18); /* behind the side panel on narrow screens */
+
+  /* ---- Status inks: the only colour in the product ---- */
+  --ink-opened: #2f6b47;         /* deep green: opened */
+  --ink-opened-wash: #e2ece4;
+  --ink-replied: #3d4a9e;        /* indigo: replied */
+  --ink-replied-wash: #e4e6f3;
+  --ink-uncertain: #8f600e;      /* ochre: opened (uncertain), warnings */
+  --ink-uncertain-wash: #f3e9d4;
+  --ink-bounced: #a33d2b;        /* brick: bounced, errors */
+  --ink-bounced-wash: #f4e0da;
+  --ink-pending: #6f6a61;        /* graphite: sent, not opened */
+  --ink-pending-wash: #ebe6dc;
+
+  /* ---- Focus ---- */
+  --focus-ring: var(--ink);      /* 1.5px ring at 2px offset */
+  --focus-ring-width: 1.5px;
+  --focus-ring-offset: 2px;
+  --focus-glow: rgb(28 26 23 / 0.15); /* 3px soft glow on inputs */
+
+  /* ---- Type ---- */
+  --font-serif: "Newsreader", "Iowan Old Style", Georgia, serif; /* titles, headline numbers */
+  --font-sans: "Inter Tight", "Segoe UI", system-ui, sans-serif;  /* everything else */
+  --numeric: tabular-nums;       /* times, counts, rates */
+  --text-caption: 0.75rem;       /* 12px: captions, timestamps in the timeline */
+  --text-label: 0.8125rem;       /* 13px: labels, table cells */
+  --text-body: 0.875rem;         /* 14px: body copy, inputs */
+  --text-title: 1.375rem;        /* 22px serif: page and panel titles */
+  --text-display: 2.125rem;      /* 34px serif: headline numbers */
+  --text-overline: 0.6875rem;    /* 11px: column headers, tracked */
+  --leading-tight: 1.2;
+  --leading-body: 1.45;
+  --tracking-overline: 0.06em;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-strong: 600;
+
+  /* ---- Space (4px base) ---- */
+  --space-1: 0.25rem;            /* 4 */
+  --space-2: 0.5rem;             /* 8 */
+  --space-3: 0.75rem;            /* 12 */
+  --space-4: 1rem;               /* 16 */
+  --space-5: 1.25rem;            /* 20 */
+  --space-6: 1.5rem;             /* 24 */
+  --space-8: 2rem;               /* 32 */
+  --space-10: 2.5rem;            /* 40 */
+  --space-12: 3rem;              /* 48 */
+  --space-16: 4rem;              /* 64 */
+
+  /* ---- Sizes ---- */
+  --row-height: 2.5rem;          /* 40px email rows */
+  --control-height: 2rem;        /* 32px buttons, inputs, chips */
+  --control-height-sm: 1.625rem; /* 26px compact chips */
+  --stamp-size: 1.375rem;        /* 22px status stamp */
+  --icon-size: 1rem;             /* 16px Lucide icons */
+  --icon-stroke: 1.5;            /* Lucide stroke width */
+  --switch-width: 2.125rem;      /* 34px */
+  --switch-height: 1.25rem;      /* 20px */
+  --switch-knob: 0.875rem;       /* 14px resting knob */
+  --switch-knob-held: 1.125rem;  /* 18px knob while pressed */
+  --panel-width: 26rem;          /* side panel */
+  --content-max: 72rem;          /* dashboard max width */
+  --search-width: 18rem;         /* toolbar search field */
+  --cell-max: 16rem;             /* widest table cell before it truncates */
+  --prose-max: 26rem;            /* empty-state copy */
+  --disabled-opacity: 0.45;      /* disabled buttons */
+  --count-opacity: 0.7;          /* counts inside chips */
+
+  /* ---- Shape ---- */
+  --hairline: 1px;               /* ledger rules and outlines */
+  --stroke: 1.5px;               /* stamp frames */
+  --radius-control: 6px;         /* buttons, inputs, chips, stamps */
+  --radius-panel: 10px;          /* side panel, toast, cards */
+  --radius-round: 999px;         /* switch track and knob only */
+  --shadow-float: 0 1px 2px rgb(28 26 23 / 0.06), 0 12px 32px -8px rgb(28 26 23 / 0.18); /* panel, toast */
+
+  /* ---- Motion (my-motion defaults + this project's moments) ---- */
+  --duration-hover: 120ms;       /* colour fades on hover and press */
+  --duration-move: 200ms;        /* sliding chip, switch knob, confirm icon pop */
+  --duration-enter: 220ms;       /* panel, toast appear */
+  --duration-exit: 150ms;        /* panel, toast leave (faster than enter) */
+  --duration-swap: 140ms;        /* tab content fade */
+  --duration-stamp: 240ms;       /* signature: stamp lands */
+  --duration-bleed: 600ms;       /* signature: ink ring spreads and fades (not waited on) */
+  --duration-confirm: 1400ms;    /* how long a confirm or live-row wash stays */
+  --duration-shimmer: 1600ms;    /* skeleton loop, only while loading */
+  --delay-contents: 80ms;        /* panel contents follow the panel */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);  /* movement */
+  --ease-colour: cubic-bezier(0.4, 0, 0.2, 1); /* colour and opacity */
+  --rise-distance: 8px;          /* how far things rise as they appear */
+  --press-scale: 0.97;           /* press dip */
+  --stamp-from-scale: 1.35;      /* stamp lands from this size, never overshoots below 1 */
+  --bleed-scale: 1.9;            /* how far the ink ring spreads */
+  --swap-from-opacity: 0.4;      /* content swap start opacity */
+}
+
+/* ---- Dark: warm charcoal paper ---- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1d1b18;
+  --paper-raised: #252320;
+  --paper-sunken: #2c2925;
+  --ink: #ede8df;
+  --ink-muted: #b0a99d;
+  --ink-faint: #8f897e;
+  --on-ink: #1d1b18;
+  --rule: #36322d;
+  --rule-strong: #4a453e;
+  --selection-tint: rgb(237 232 223 / 0.06);
+  --hover-tint: rgb(237 232 223 / 0.045);
+  --scrim: rgb(0 0 0 / 0.35);
+  --ink-opened: #86c9a0;
+  --ink-opened-wash: #23332a;
+  --ink-replied: #a3adf2;
+  --ink-replied-wash: #282c45;
+  --ink-uncertain: #e2b462;
+  --ink-uncertain-wash: #3a2f1c;
+  --ink-bounced: #ec917e;
+  --ink-bounced-wash: #3f2621;
+  --ink-pending: #a39d92;
+  --ink-pending-wash: #302d28;
+  --focus-glow: rgb(237 232 223 / 0.18);
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.55);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #1d1b18;
+    --paper-raised: #252320;
+    --paper-sunken: #2c2925;
+    --ink: #ede8df;
+    --ink-muted: #b0a99d;
+    --ink-faint: #8f897e;
+    --on-ink: #1d1b18;
+    --rule: #36322d;
+    --rule-strong: #4a453e;
+    --selection-tint: rgb(237 232 223 / 0.06);
+    --hover-tint: rgb(237 232 223 / 0.045);
+    --scrim: rgb(0 0 0 / 0.35);
+    --ink-opened: #86c9a0;
+    --ink-opened-wash: #23332a;
+    --ink-replied: #a3adf2;
+    --ink-replied-wash: #282c45;
+    --ink-uncertain: #e2b462;
+    --ink-uncertain-wash: #3a2f1c;
+    --ink-bounced: #ec917e;
+    --ink-bounced-wash: #3f2621;
+    --ink-pending: #a39d92;
+    --ink-pending-wash: #302d28;
+    --focus-glow: rgb(237 232 223 / 0.18);
+    --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.55);
+  }
+}
+
+/* ---- Reduced motion: everything jumps to its end state ---- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-hover: 0ms;
+    --duration-move: 0ms;
+    --duration-enter: 0ms;
+    --duration-exit: 0ms;
+    --duration-swap: 0ms;
+    --duration-stamp: 0ms;
+    --duration-bleed: 0ms;
+    --duration-shimmer: 0ms;
+    --delay-contents: 0ms;
+  }
+}
+:root[data-motion="reduce"] {
+  --duration-hover: 0ms;
+  --duration-move: 0ms;
+  --duration-enter: 0ms;
+  --duration-exit: 0ms;
+  --duration-swap: 0ms;
+  --duration-stamp: 0ms;
+  --duration-bleed: 0ms;
+  --duration-shimmer: 0ms;
+  --delay-contents: 0ms;
+}

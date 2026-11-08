@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Email Tracker</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" class="sprite" aria-hidden="true">
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><path d="M12 16h.01" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></symbol>
+      <!-- Stamp marks -->
+      <symbol id="m-check" viewBox="0 0 24 24"><path d="M6 12.5 10.5 17 18 7.5" /></symbol>
+      <symbol id="m-double" viewBox="0 0 24 24"><path d="M2.5 12.5 7 17l7.5-9.5" /><path d="M12 15.5 13.5 17 21 7.5" /></symbol>
+      <symbol id="m-reply" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5" /><path d="M4 12h10a6 6 0 0 1 6 6v1" /></symbol>
+      <symbol id="m-cross" viewBox="0 0 24 24"><path d="M7 7l10 10" /><path d="M17 7 7 17" /></symbol>
+      <symbol id="m-dash" viewBox="0 0 24 24"><path d="M7 12h10" /></symbol>
+      <!-- Mirror: an oval reflecting a small dot (my own view) -->
+      <symbol id="m-mirror" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="5.5" ry="7.5" /><circle cx="13.5" cy="10" r="1.25" /></symbol>
+    </svg>
+
+    <main class="wrap">
+      <header class="topbar">
+        <h1>Email Tracker</h1>
+        <div class="row-flex">
+          <output id="syncNote" class="faint caption" aria-live="polite"></output>
+          <button type="button" class="btn btn-secondary" id="sync">
+            <svg class="icon"><use href="#i-refresh" /></svg><span>Check now</span>
+          </button>
+          <a class="btn btn-ghost" href="settings.html"><svg class="icon"><use href="#i-settings" /></svg>Settings</a>
+        </div>
+      </header>
+
+      <div class="banner" id="banner" role="alert" hidden>
+        <svg class="icon"><use href="#i-alert" /></svg>
+        <span id="bannerText"></span>
+      </div>
+
+      <div class="filter-band" id="filterBand">
+      <div class="toolbar">
+        <div class="chips" role="radiogroup" aria-label="Status" id="statusChips">
+          <span class="indicator" aria-hidden="true"></span>
+        </div>
+        <label class="search">
+          <span class="sr-only">Search</span>
+          <svg class="icon"><use href="#i-search" /></svg>
+          <input class="input" type="search" id="search" placeholder="Search people, companies, subjects" autocomplete="off" />
+        </label>
+      </div>
+      <div class="toolbar toolbar-sub">
+        <label class="inline-field">Role
+          <select class="select" id="role">
+            <option value="any">Any</option>
+            <option value="founder">Founder</option>
+            <option value="hiring_manager">Hiring manager</option>
+            <option value="recruiter">Recruiter</option>
+            <option value="other">Other</option>
+            <option value="">Not set</option>
+          </select>
+        </label>
+        <label class="inline-field">Sent
+          <select class="select" id="range">
+            <option value="">Any time</option>
+            <option value="1">Last 24 hours</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </label>
+        <label class="inline-field">Sort by
+          <select class="select" id="sort">
+            <option value="sent">Sent</option>
+            <option value="first_open">First open</option>
+            <option value="last_activity">Last activity</option>
+          </select>
+        </label>
+        <div class="columns">
+          <button type="button" class="btn btn-ghost" id="columnsButton" aria-expanded="false" aria-controls="columnsMenu">Columns</button>
+          <fieldset class="columns-menu" id="columnsMenu">
+            <legend class="sr-only">Show columns</legend>
+            <label><input type="checkbox" id="col-company" /> Company</label>
+            <label><input type="checkbox" id="col-subject" /> Subject</label>
+            <label><input type="checkbox" id="col-firstOpen" /> First open</label>
+            <label><input type="checkbox" id="col-lastActivity" /> Last activity</label>
+          </fieldset>
+        </div>
+      </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="ledger">
+          <thead>
+            <tr>
+              <th scope="col">Status</th>
+              <th scope="col">To</th>
+              <th scope="col">Subject</th>
+              <th scope="col">Sent</th>
+              <th scope="col">First open</th>
+              <th scope="col">Last activity</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="empty" id="empty" hidden>
+        <span class="stamp" data-status="not_opened" aria-hidden="true"><svg><use href="#m-check" /></svg></span>
+        <h2>No tracked emails yet</h2>
+        <p>Send an email from Gmail as usual. It will show up here, and you'll see the moment it's opened.</p>
+        <p class="faint caption">Check that the tracker is set up first in <a href="settings.html">Settings</a>.</p>
+      </div>
+      <div class="empty" id="noMatch" hidden>
+        <h2>No emails match</h2>
+        <p>Nothing fits these filters.</p>
+        <button type="button" class="btn btn-secondary" id="clearFilters">Clear filters</button>
+      </div>
+    </main>
+
+    <aside class="panel" id="panel" aria-label="Email details" aria-hidden="true">
+      <div class="panel-inner">
+        <div class="panel-head">
+          <div>
+            <div class="overline" id="pCompany"></div>
+            <h2 id="pTo"></h2>
+            <div class="muted label-size" id="pSubject"></div>
+          </div>
+          <button type="button" class="btn btn-icon" id="closePanel" aria-label="Close"><svg class="icon"><use href="#i-x" /></svg></button>
+        </div>
+        <div class="status" id="pStatus"></div>
+        <section>
+          <h3 class="overline">Timeline</h3>
+          <ol class="timeline" id="pTimeline"></ol>
+        </section>
+        <form class="tags" id="tags">
+          <h3 class="overline">Tags</h3>
+          <label class="field">Company<input class="input" name="company" autocomplete="off" /></label>
+          <label class="field">Role
+            <select class="select" name="role">
+              <option value="">Not set</option>
+              <option value="founder">Founder</option>
+              <option value="hiring_manager">Hiring manager</option>
+              <option value="recruiter">Recruiter</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label class="field">Variant<input class="input" name="variant" autocomplete="off" /></label>
+          <div class="row-flex">
+            <button type="submit" class="btn btn-primary confirm" id="saveTags">
+              <span class="label">Save tags</span><span class="ok"><svg class="icon"><use href="#i-check" /></svg>Saved</span>
+            </button>
+            <a class="btn btn-ghost" id="pGmail" target="_blank" rel="noopener"><svg class="icon"><use href="#i-external" /></svg>Open in Gmail</a>
+            <button type="button" class="btn btn-ghost" id="pDelete"><svg class="icon"><use href="#i-trash" /></svg>Delete</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <div class="toast-host" id="toastHost" aria-live="polite"></div>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

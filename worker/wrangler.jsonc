@@ -1,0 +1,14 @@
+{
+  "name": "email-tracker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "triggers": { "crons": ["17 3 * * *"] },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "email-tracker",
+      "database_id": "REPLACE_WITH_YOUR_D1_ID",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

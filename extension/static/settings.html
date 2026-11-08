@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Email Tracker settings</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <main class="wrap settings">
+      <header class="topbar">
+        <h1>Settings</h1>
+        <a class="btn btn-ghost" href="dashboard.html">Back to emails</a>
+      </header>
+
+      <section class="block" aria-labelledby="h-setup">
+        <h2 id="h-setup" class="overline">Setup</h2>
+        <ul id="checklist" class="checklist" aria-live="polite"></ul>
+        <div class="row-flex">
+          <button type="button" class="btn btn-secondary" id="testEmail">Send a test email</button>
+          <button type="button" class="btn btn-ghost" id="recheck">Check again</button>
+          <output id="testEmailHint" class="muted label-size"></output>
+        </div>
+      </section>
+
+      <form id="settings">
+        <section class="block" aria-labelledby="h-tracker">
+          <h2 id="h-tracker" class="overline">Tracker</h2>
+          <label class="field" for="trackerHost">Worker host
+            <input class="input" id="trackerHost" placeholder="email-tracker.you.workers.dev" autocomplete="off" required />
+          </label>
+          <label class="field" for="apiSecret">API secret
+            <input class="input" id="apiSecret" type="password" autocomplete="off" required />
+          </label>
+          <div class="row-flex">
+            <button type="button" class="btn btn-secondary" id="test">Test tracker</button>
+            <output id="testResult" class="label-size muted" aria-live="polite"></output>
+          </div>
+        </section>
+
+        <section class="block" aria-labelledby="h-gmail">
+          <h2 id="h-gmail" class="overline">Gmail sync <span class="faint">(optional)</span></h2>
+          <p class="muted">Read-only access finds replies and bounces. Nothing is sent or changed in your mailbox.</p>
+          <p class="faint caption">Tip: reading your own Sent copy in the Gmail phone app can't be detected, so it shows as an open. Open the email on the dashboard, hover that open in its timeline and choose <b>That was me</b>.</p>
+          <details class="walkthrough">
+            <summary>How to turn this on (about 10 minutes, once)</summary>
+            <ol>
+              <li>In <a href="https://console.cloud.google.com/" target="_blank" rel="noreferrer">Google Cloud Console</a>, create a project and enable the <b>Gmail API</b>.</li>
+              <li>Set up the OAuth consent screen as <b>External</b>, leave it in <b>Testing</b>, and add your Gmail address as a test user. Add the scope <code>gmail.readonly</code>.</li>
+              <li>Create an <b>OAuth client ID</b> of type <b>Chrome extension</b>. For its Item ID use your extension ID: <code id="extensionId"></code></li>
+              <li>Put the client ID in <code>extension/local.config.json</code> as <code>oauthClientId</code>, run <code>npm run build</code> in <code>extension/</code>, and reload the extension.</li>
+              <li>Come back here and press <b>Connect Gmail</b>.</li>
+            </ol>
+            <p class="faint caption">Testing-mode Google apps expire access every 7 days; press Reconnect when asked.</p>
+          </details>
+          <div class="row-flex">
+            <button type="button" class="btn btn-secondary" id="gmailConnect">Connect Gmail</button>
+            <output id="gmailStatus" class="label-size muted" aria-live="polite"></output>
+          </div>
+        </section>
+
+        <section class="block" aria-labelledby="h-notify">
+          <h2 id="h-notify" class="overline">Notifications</h2>
+          <label class="switch-row" for="notifications">
+            <span>
+              Desktop notification when someone opens an email
+              <small class="faint">For the first real open, and a re-open more than an hour later. Never for replies, bounces or your own views.</small>
+            </span>
+            <input class="switch" id="notifications" type="checkbox" role="switch" />
+          </label>
+        </section>
+
+        <section class="block" aria-labelledby="h-rules">
+          <h2 id="h-rules" class="overline">Rules</h2>
+          <label class="field" for="followUpDays">Days after an open with no reply before it needs a follow-up
+            <input class="input narrow" id="followUpDays" type="number" min="1" max="30" />
+          </label>
+          <label class="field" for="neverTrack">Never track: one per line, an address, a domain (family.org) or a country ending (*.de)
+            <textarea class="input area" id="neverTrack" rows="4"></textarea>
+          </label>
+          <label class="field" for="seedAddresses">Your seed inboxes, one per line. Emails sent only to these are marked as seed tests.
+            <textarea class="input area" id="seedAddresses" rows="3"></textarea>
+          </label>
+        </section>
+
+        <section class="block" aria-labelledby="h-retention">
+          <h2 id="h-retention" class="overline">Worker retention</h2>
+          <label class="field" for="retentionDays">Delete opens older than (days)
+            <input class="input narrow" id="retentionDays" type="number" min="1" max="3650" />
+          </label>
+          <p class="faint caption">Saved on the Worker. Only open events and tokens are deleted; your local dashboard data is kept.</p>
+        </section>
+
+        <div class="row-flex save-bar">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <output id="saveResult" class="label-size muted" aria-live="polite"></output>
+        </div>
+      </form>
+
+      <section class="block" aria-labelledby="h-privacy">
+        <h2 id="h-privacy" class="overline">Privacy</h2>
+        <p class="muted">Recipients and subjects stay in this browser. The Worker holds only random tokens and open events. Export and Import are on the dashboard.</p>
+        <div class="row-flex">
+          <button type="button" class="btn btn-secondary danger-btn" id="deleteLocal">Delete all my local data</button>
+          <button type="button" class="btn btn-secondary danger-btn" id="deleteWorker">Delete all Worker events</button>
+          <output id="privacyResult" class="label-size muted" aria-live="polite"></output>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="settings.js"></script>
+  </body>
+</html>

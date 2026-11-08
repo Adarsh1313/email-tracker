@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Email Tracker design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  /* Every value below comes from tokens.css. */
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: var(--weight-regular) var(--text-body) / var(--leading-body) var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  .wrap { max-width: var(--content-max); margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-16); }
+  .serif { font-family: var(--font-serif); font-weight: var(--weight-regular); }
+  h1, h2, h3 { margin: 0; font-weight: var(--weight-regular); }
+  h1 { font-family: var(--font-serif); font-size: var(--text-title); line-height: var(--leading-tight); }
+  h2.section {
+    font-family: var(--font-serif); font-size: var(--text-title); line-height: var(--leading-tight);
+    padding-block: var(--space-12) var(--space-2); border-bottom: var(--hairline) solid var(--rule); margin-bottom: var(--space-6);
+  }
+  .note { color: var(--ink-muted); font-size: var(--text-label); max-width: 40rem; margin: var(--space-1) 0 var(--space-6); }
+  .overline {
+    font-size: var(--text-overline); letter-spacing: var(--tracking-overline); text-transform: uppercase;
+    color: var(--ink-faint); font-weight: var(--weight-strong);
+  }
+  .row-flex { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+  .num { font-variant-numeric: var(--numeric); }
+  .muted { color: var(--ink-muted); }
+  .faint { color: var(--ink-faint); }
+  svg.icon { width: var(--icon-size); height: var(--icon-size); stroke: currentColor; stroke-width: var(--icon-stroke); fill: none; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  /* ---------- Top bar ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    height: var(--control-height); padding: 0 var(--space-3); border-radius: var(--radius-control);
+    border: var(--hairline) solid transparent; background: transparent; cursor: pointer;
+    font-size: var(--text-label); font-weight: var(--weight-medium); white-space: nowrap;
+    transition: background-color var(--duration-hover) var(--ease-colour), color var(--duration-hover) var(--ease-colour),
+      border-color var(--duration-hover) var(--ease-colour), transform var(--duration-hover) var(--ease-out);
+  }
+  .btn:active, .btn.is-pressed { transform: scale(var(--press-scale)); }
+  .btn:disabled, .btn.is-disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--ink); color: var(--on-ink); }
+  .btn-secondary { border-color: var(--rule-strong); background: var(--paper-raised); }
+  .btn-ghost { color: var(--ink-muted); }
+  .btn-icon { width: var(--control-height); padding: 0; color: var(--ink-muted); }
+  @media (hover: hover) {
+    .btn-primary:not(:disabled):hover { background: var(--ink-muted); }
+    .btn-secondary:not(:disabled):hover, .btn-ghost:not(:disabled):hover, .btn-icon:not(:disabled):hover { background: var(--hover-tint); color: var(--ink); }
+  }
+  .btn-primary.is-hover { background: var(--ink-muted); }
+  .btn-secondary.is-hover, .btn-ghost.is-hover, .btn-icon.is-hover { background: var(--hover-tint); color: var(--ink); }
+  .is-focus { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  .btn .spinner { width: var(--icon-size); height: var(--icon-size); border-radius: var(--radius-round); border: var(--stroke) solid currentColor; border-right-color: transparent; animation: spin var(--duration-shimmer) linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Confirm swap */
+  .confirm { position: relative; }
+  .confirm .ok { display: none; align-items: center; gap: var(--space-1); color: var(--ink-opened); }
+  .confirm.is-confirmed .label { display: none; }
+  .confirm.is-confirmed .ok { display: inline-flex; }
+  .confirm.is-confirmed .ok svg { animation: pop var(--duration-move) var(--ease-out); }
+  @keyframes pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ---------- Sliding inverted ink chip (tabs, filters, segmented) ---------- */
+  .chips { position: relative; display: inline-flex; gap: var(--space-1); padding: var(--space-1); border-radius: calc(var(--radius-control) + var(--space-1)); }
+  .chips.boxed { border: var(--hairline) solid var(--rule); background: var(--paper-raised); }
+  .chips .indicator {
+    position: absolute; top: var(--space-1); left: 0; height: calc(100% - 2 * var(--space-1));
+    border-radius: var(--radius-control); background: var(--ink); z-index: 0;
+    transition: transform var(--duration-move) var(--ease-out), width var(--duration-move) var(--ease-out);
+  }
+  .chip {
+    position: relative; z-index: 1; height: var(--control-height-sm); padding: 0 var(--space-3);
+    border: 0; background: transparent; border-radius: var(--radius-control); cursor: pointer;
+    font-size: var(--text-label); font-weight: var(--weight-medium); color: var(--ink-muted);
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    transition: color var(--duration-move) var(--ease-colour), background-color var(--duration-hover) var(--ease-colour);
+  }
+  .chip[aria-selected="true"], .chip[aria-checked="true"] { color: var(--on-ink); font-weight: var(--weight-strong); }
+  @media (hover: hover) { .chip:not([aria-selected="true"]):not([aria-checked="true"]):hover { background: var(--hover-tint); color: var(--ink); } }
+  .chip .count { font-variant-numeric: var(--numeric); opacity: 0.7; }
+  .tabs .chip { height: var(--control-height); padding: 0 var(--space-4); font-size: var(--text-body); }
+
+  /* ---------- Inputs ---------- */
+  .field { display: grid; gap: var(--space-1); font-size: var(--text-label); color: var(--ink-muted); }
+  .input, .select {
+    height: var(--control-height); padding: 0 var(--space-3); border-radius: var(--radius-control);
+    border: var(--hairline) solid var(--rule-strong); background: var(--paper-raised); color: var(--ink);
+    font-size: var(--text-body); min-width: 0;
+    transition: border-color var(--duration-hover) var(--ease-colour), box-shadow var(--duration-hover) var(--ease-colour);
+  }
+  .input::placeholder { color: var(--ink-faint); }
+  .input:focus-visible, .select:focus-visible, .input.is-focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--focus-glow); }
+  .input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .input.is-error { border-color: var(--ink-bounced); }
+  .field .error { color: var(--ink-bounced); font-size: var(--text-caption); }
+  .search { position: relative; display: inline-flex; align-items: center; }
+  .search svg { position: absolute; left: var(--space-3); color: var(--ink-faint); pointer-events: none; }
+  .search .input { padding-left: calc(var(--space-3) + var(--icon-size) + var(--space-2)); width: 16rem; }
+
+  /* ---------- Switch ---------- */
+  .switch {
+    position: relative; width: var(--switch-width); height: var(--switch-height); border-radius: var(--radius-round);
+    border: 0; padding: 0; background: var(--rule-strong); cursor: pointer; flex: none;
+    transition: background-color var(--duration-move) var(--ease-colour);
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 50%; left: calc((var(--switch-height) - var(--switch-knob)) / 2);
+    width: var(--switch-knob); height: var(--switch-knob); border-radius: var(--radius-round); background: var(--paper-raised);
+    transform: translate(0, -50%);
+    transition: transform var(--duration-move) var(--ease-out), width var(--duration-move) var(--ease-out);
+  }
+  .switch[aria-checked="true"] { background: var(--ink); }
+  .switch[aria-checked="true"]::after { transform: translate(calc(var(--switch-width) - var(--switch-height)), -50%); }
+  .switch:active::after { width: var(--switch-knob-held); }
+  .switch[aria-checked="true"]:active::after { transform: translate(calc(var(--switch-width) - var(--switch-height) - (var(--switch-knob-held) - var(--switch-knob))), -50%); }
+  .switch:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Compose toggle (lives inside Gmail) */
+  .compose-toggle {
+    width: var(--control-height); height: var(--control-height); border-radius: var(--radius-control); border: 0;
+    display: inline-grid; place-items: center; background: transparent; color: var(--ink-faint); cursor: pointer;
+    transition: color var(--duration-move) var(--ease-colour), background-color var(--duration-hover) var(--ease-colour), transform var(--duration-hover) var(--ease-out);
+  }
+  .compose-toggle[aria-checked="true"] { color: var(--ink); }
+  .compose-toggle .slash { stroke-dasharray: 30; stroke-dashoffset: 0; transition: stroke-dashoffset var(--duration-move) var(--ease-out); }
+  .compose-toggle[aria-checked="true"] .slash { stroke-dashoffset: 30; }
+  .compose-toggle:active { transform: scale(var(--press-scale)); }
+  @media (hover: hover) { .compose-toggle:hover { background: var(--hover-tint); } }
+  .compose-toggle[data-reason="never-track"] { color: var(--ink-faint); cursor: help; }
+  .gmail-bar { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2); border: var(--hairline) solid var(--rule); border-radius: var(--radius-panel); background: var(--paper-raised); }
+  .fake-send { height: var(--control-height); padding: 0 var(--space-4); border-radius: var(--radius-round); border: 0; background: var(--ink-replied); color: var(--on-ink); font-weight: var(--weight-medium); font-size: var(--text-label); }
+
+  /* ---------- Signature: ink stamp ---------- */
+  .stamp {
+    --s-ink: var(--ink-pending); --s-wash: transparent;
+    position: relative; display: inline-grid; place-items: center; flex: none;
+    width: var(--stamp-size); height: var(--stamp-size); border-radius: var(--radius-control);
+    border: var(--stroke) solid var(--s-ink); background: var(--s-wash); color: var(--s-ink);
+    font: var(--weight-strong) var(--text-caption) / 1 var(--font-sans); letter-spacing: -0.08em;
+  }
+  .stamp svg { width: calc(var(--stamp-size) - var(--space-2)); height: calc(var(--stamp-size) - var(--space-2)); stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .stamp[data-status="not_opened"] { --s-ink: var(--ink-pending); border-width: var(--hairline); }
+  .stamp[data-status="opened"] { --s-ink: var(--ink-opened); }
+  .stamp[data-status="opened_uncertain"] { --s-ink: var(--ink-uncertain); border-style: dashed; }
+  .stamp[data-status="replied"] { --s-ink: var(--ink-replied); --s-wash: var(--ink-replied-wash); }
+  .stamp[data-status="bounced"] { --s-ink: var(--ink-bounced); --s-wash: var(--ink-bounced-wash); }
+  .stamp[data-status="untracked"] { --s-ink: var(--ink-faint); border-style: dashed; border-width: var(--hairline); }
+  .stamp::before { /* ink bleed ring */
+    content: ""; position: absolute; inset: calc(-1 * var(--stroke)); border-radius: inherit;
+    background: var(--s-ink); opacity: 0; pointer-events: none;
+  }
+  .stamp.is-landing { animation: stamp-land var(--duration-stamp) var(--ease-out) both; }
+  .stamp.is-landing::before { animation: stamp-bleed var(--duration-bleed) var(--ease-out) both; }
+  @keyframes stamp-land {
+    from { transform: scale(var(--stamp-from-scale)); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes stamp-bleed {
+    0% { transform: scale(1); opacity: 0.28; }
+    100% { transform: scale(var(--bleed-scale)); opacity: 0; }
+  }
+  .status { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-label); }
+  .status .label { color: var(--ink-muted); }
+  .stamp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: var(--space-4) var(--space-6); }
+
+  /* ---------- Headline strip ---------- */
+  .headline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: var(--hairline) solid var(--rule); }
+  .headline > div { padding: var(--space-4) var(--space-4) var(--space-4) 0; }
+  .headline > div + div { padding-left: var(--space-4); border-left: var(--hairline) solid var(--rule); }
+  .headline .value { font-family: var(--font-serif); font-size: var(--text-display); line-height: var(--leading-tight); font-variant-numeric: var(--numeric); }
+  .headline .value small { font-size: var(--text-body); color: var(--ink-faint); font-family: var(--font-sans); margin-left: var(--space-1); }
+  @media (max-width: 40rem) { .headline { grid-template-columns: repeat(2, minmax(0, 1fr)); } .headline > div:nth-child(3) { border-left: 0; padding-left: 0; } }
+
+  /* ---------- Dashboard frame ---------- */
+  .app { border: var(--hairline) solid var(--rule); border-radius: var(--radius-panel); background: var(--paper); overflow: hidden; position: relative; min-height: calc(var(--panel-width) + var(--space-16) * 3); }
+  .app-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-5) var(--space-6) var(--space-4); flex-wrap: wrap; }
+  .app-body { padding: 0 var(--space-6) var(--space-6); }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-4); flex-wrap: wrap; }
+  .view { transition: opacity var(--duration-swap) var(--ease-colour); }
+  .view.is-swapping { opacity: var(--swap-from-opacity); transition: none; }
+
+  /* ---------- Table ---------- */
+  .ledger { width: 100%; border-collapse: collapse; font-size: var(--text-label); }
+  .ledger th {
+    text-align: left; padding: 0 var(--space-3) var(--space-2); white-space: nowrap;
+    font-size: var(--text-overline); letter-spacing: var(--tracking-overline); text-transform: uppercase;
+    color: var(--ink-faint); font-weight: var(--weight-strong); border-bottom: var(--hairline) solid var(--rule-strong);
+  }
+  .ledger td { height: var(--row-height); padding: 0 var(--space-3); border-bottom: var(--hairline) solid var(--rule); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 16rem; }
+  .ledger tbody tr { cursor: pointer; transition: background-color var(--duration-confirm) var(--ease-colour); }
+  .ledger tbody tr.is-live { background: var(--selection-tint); transition: background-color var(--duration-hover) var(--ease-colour); }
+  .ledger tbody tr[aria-selected="true"] { background: var(--selection-tint); }
+  @media (hover: hover) { .ledger tbody tr:hover { background: var(--hover-tint); transition-duration: var(--duration-hover); } }
+  .ledger .who { font-weight: var(--weight-medium); }
+  .ledger .who small { display: block; color: var(--ink-faint); font-weight: var(--weight-regular); font-size: var(--text-caption); }
+  .ledger td.time { color: var(--ink-muted); font-variant-numeric: var(--numeric); }
+  .ledger .actions { width: 1%; text-align: right; }
+  .ledger .actions .btn { opacity: 0; transition: opacity var(--duration-hover) var(--ease-colour); }
+  .ledger tr:hover .actions .btn, .ledger tr:focus-within .actions .btn { opacity: 1; }
+  .ledger .subject { color: var(--ink-muted); }
+  .table-scroll { overflow-x: auto; }
+
+  /* ---------- Side panel ---------- */
+  .panel {
+    position: absolute; top: var(--space-3); right: var(--space-3); bottom: var(--space-3); width: min(var(--panel-width), calc(100% - 2 * var(--space-3)));
+    background: var(--paper-raised); border: var(--hairline) solid var(--rule); border-radius: var(--radius-panel); box-shadow: var(--shadow-float);
+    display: flex; flex-direction: column; z-index: 5;
+    opacity: 0; transform: translateX(var(--space-6)); pointer-events: none; visibility: hidden;
+    transition: opacity var(--duration-exit) var(--ease-colour), transform var(--duration-exit) var(--ease-out), visibility 0s linear var(--duration-exit);
+  }
+  .panel.is-open {
+    opacity: 1; transform: none; pointer-events: auto; visibility: visible;
+    transition: opacity var(--duration-enter) var(--ease-colour), transform var(--duration-enter) var(--ease-out), visibility 0s;
+  }
+  .panel .panel-inner { opacity: 0; transition: opacity var(--duration-exit) var(--ease-colour); overflow-y: auto; padding: var(--space-5); display: grid; gap: var(--space-5); align-content: start; }
+  .panel.is-open .panel-inner { opacity: 1; transition: opacity var(--duration-enter) var(--ease-colour) var(--delay-contents); }
+  .panel-head { display: flex; justify-content: space-between; align-items: start; gap: var(--space-3); }
+  .panel-head h3 { font-family: var(--font-serif); font-size: var(--text-title); line-height: var(--leading-tight); }
+  .timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+  .timeline li { display: grid; grid-template-columns: var(--stamp-size) 1fr auto; gap: var(--space-3); align-items: center; padding-block: var(--space-2); border-bottom: var(--hairline) solid var(--rule); font-size: var(--text-label); }
+  .timeline li .stamp { width: var(--stamp-size); height: var(--stamp-size); }
+  .timeline .faded { color: var(--ink-faint); }
+  .timeline time { color: var(--ink-faint); font-size: var(--text-caption); font-variant-numeric: var(--numeric); }
+  .tags { display: grid; gap: var(--space-3); }
+
+  /* ---------- Feedback ---------- */
+  .toast-host { position: fixed; left: 50%; bottom: var(--space-6); transform: translateX(-50%); z-index: 20; display: grid; gap: var(--space-2); justify-items: center; }
+  .toast {
+    display: inline-flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-panel);
+    background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-float); font-size: var(--text-label);
+    opacity: 0; transform: translateY(var(--rise-distance));
+    transition: opacity var(--duration-exit) var(--ease-colour), transform var(--duration-exit) var(--ease-out);
+  }
+  .toast.is-in { opacity: 1; transform: none; transition: opacity var(--duration-enter) var(--ease-colour), transform var(--duration-enter) var(--ease-out); }
+  .toast .dot { width: var(--space-2); height: var(--space-2); border-radius: var(--radius-round); background: var(--ink-uncertain); }
+  .banner { display: flex; gap: var(--space-3); align-items: start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-panel); background: var(--ink-bounced-wash); color: var(--ink); font-size: var(--text-label); }
+  .banner svg { color: var(--ink-bounced); margin-top: var(--space-1); }
+  .banner strong { font-weight: var(--weight-medium); }
+  .skeleton { height: var(--space-3); border-radius: var(--radius-control); background: linear-gradient(90deg, var(--paper-sunken) 0%, var(--rule) 50%, var(--paper-sunken) 100%); background-size: 200% 100%; animation: shimmer var(--duration-shimmer) linear infinite; }
+  @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  .empty { text-align: center; padding: var(--space-12) var(--space-6); display: grid; gap: var(--space-2); justify-items: center; }
+  .empty h3 { font-family: var(--font-serif); font-size: var(--text-title); }
+  .empty p { margin: 0; color: var(--ink-muted); max-width: 26rem; }
+  .health { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: var(--space-4); }
+  .card { border: var(--hairline) solid var(--rule); border-radius: var(--radius-panel); padding: var(--space-4); display: grid; gap: var(--space-2); background: var(--paper-raised); }
+  .card .value { font-family: var(--font-serif); font-size: var(--text-display); line-height: var(--leading-tight); font-variant-numeric: var(--numeric); }
+  .card .verdict { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-label); }
+  .card[data-state="warning"] { border-color: var(--ink-uncertain); }
+  .card[data-state="warning"] .verdict { color: var(--ink-uncertain); }
+  .card[data-state="ok"] .verdict { color: var(--ink-opened); }
+
+  /* ---------- State grid, swatches, type ---------- */
+  .states { display: grid; grid-template-columns: 7rem repeat(6, minmax(6.5rem, 1fr)); gap: var(--space-3) var(--space-4); align-items: center; overflow-x: auto; }
+  .states .overline { white-space: nowrap; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: var(--space-3); }
+  .swatch { border: var(--hairline) solid var(--rule); border-radius: var(--radius-panel); overflow: hidden; font-size: var(--text-caption); background: var(--paper-raised); }
+  .swatch .chipcol { height: var(--space-12); border-bottom: var(--hairline) solid var(--rule); }
+  .swatch div:last-child { padding: var(--space-2) var(--space-3); display: grid; }
+  .swatch code { color: var(--ink-faint); }
+  .type-row { display: grid; grid-template-columns: 9rem 1fr; gap: var(--space-4); align-items: baseline; padding-block: var(--space-3); border-bottom: var(--hairline) solid var(--rule); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: var(--space-6); }
+  .demo-box { border: var(--hairline) solid var(--rule); border-radius: var(--radius-panel); padding: var(--space-5); display: grid; gap: var(--space-4); align-content: start; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+  <!-- Stamp marks (custom) -->
+  <symbol id="m-check" viewBox="0 0 24 24"><path d="M6 12.5 10.5 17 18 7.5"/></symbol>
+  <symbol id="m-double" viewBox="0 0 24 24"><path d="M2.5 12.5 7 17l7.5-9.5"/><path d="M12 15.5 13.5 17 21 7.5"/></symbol>
+  <symbol id="m-reply" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6v1"/></symbol>
+  <symbol id="m-cross" viewBox="0 0 24 24"><path d="M7 7l10 10"/><path d="M17 7 7 17"/></symbol>
+  <symbol id="m-dash" viewBox="0 0 24 24"><path d="M7 12h10"/></symbol>
+</svg>
+
+<main class="wrap">
+  <header class="topbar">
+    <div>
+      <h1>Email Tracker <span class="faint">· design system</span></h1>
+      <p class="note">Quiet ledger: warm paper, hairline rules, and status ink as the only colour. Every value on this page comes from <code>tokens.css</code>.</p>
+    </div>
+    <div class="row-flex">
+      <div class="chips boxed" role="radiogroup" aria-label="Theme" data-chips>
+        <span class="indicator" aria-hidden="true"></span>
+        <button class="chip" role="radio" aria-checked="true" data-theme-choice="system">System</button>
+        <button class="chip" role="radio" aria-checked="false" data-theme-choice="light">Light</button>
+        <button class="chip" role="radio" aria-checked="false" data-theme-choice="dark">Dark</button>
+      </div>
+      <label class="row-flex muted" style="gap: var(--space-2); font-size: var(--text-label)">
+        <button class="switch" role="switch" aria-checked="false" id="reduceMotion" aria-label="Reduce motion"></button>
+        Reduce motion
+      </label>
+    </div>
+  </header>
+
+  <!-- ====================== Signature ====================== -->
+  <h2 class="section">Signature: the ink stamp</h2>
+  <p class="note">Read-receipt language in status ink. Dashed frames mean doubt. When a status changes live, the new mark stamps in and a single ink ring spreads behind it. Click any stamp to replay it.</p>
+  <div class="stamp-grid" id="stampGrid"></div>
+
+  <!-- ====================== Key screen ====================== -->
+  <h2 class="section">Key screen: Emails</h2>
+  <p class="note">Click a row to open its side panel. "Simulate a live open" changes a row while you watch. Hover a row for its actions, and hover a time for the exact timestamp.</p>
+  <div class="app" id="app">
+    <div class="app-head">
+      <div class="tabs chips" role="tablist" aria-label="Views" data-chips>
+        <span class="indicator" aria-hidden="true"></span>
+        <button class="chip" role="tab" aria-selected="true" data-view="emails">Emails</button>
+        <button class="chip" role="tab" aria-selected="false" data-view="stats">Stats</button>
+        <button class="chip" role="tab" aria-selected="false" data-view="health">Health</button>
+        <button class="chip" role="tab" aria-selected="false" data-view="settings">Settings</button>
+      </div>
+      <div class="row-flex">
+        <button class="btn btn-ghost" id="simulate"><svg class="icon"><use href="#i-mail"/></svg>Simulate a live open</button>
+        <button class="btn btn-secondary" id="syncBtn"><svg class="icon"><use href="#i-refresh"/></svg><span>Check now</span></button>
+      </div>
+    </div>
+    <div class="app-body">
+      <div class="view" id="view">
+        <div class="headline">
+          <div><div class="overline">Sent</div><div class="value">48</div></div>
+          <div><div class="overline">Open rate</div><div class="value">62<small>%</small></div></div>
+          <div><div class="overline">Reply rate</div><div class="value">14<small>%</small></div></div>
+          <div><div class="overline">Bounce rate</div><div class="value">2<small>%</small></div></div>
+        </div>
+        <div class="toolbar">
+          <div class="chips" role="radiogroup" aria-label="Filter" data-chips>
+            <span class="indicator" aria-hidden="true"></span>
+            <button class="chip" role="radio" aria-checked="true">All <span class="count">48</span></button>
+            <button class="chip" role="radio" aria-checked="false">Needs follow-up <span class="count">6</span></button>
+            <button class="chip" role="radio" aria-checked="false">Opened <span class="count">23</span></button>
+            <button class="chip" role="radio" aria-checked="false">Replied <span class="count">7</span></button>
+            <button class="chip" role="radio" aria-checked="false">Not opened <span class="count">15</span></button>
+          </div>
+          <label class="search"><span class="sr-only">Search</span><svg class="icon"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Search people, companies, subjects" /></label>
+        </div>
+        <div class="table-scroll">
+          <table class="ledger">
+            <thead><tr><th scope="col">Status</th><th scope="col">To</th><th scope="col">Subject</th><th scope="col">Sent</th><th scope="col">First open</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel" id="panel" aria-label="Email details" aria-hidden="true">
+      <div class="panel-inner">
+        <div class="panel-head">
+          <div>
+            <div class="overline" id="pCompany">Acme</div>
+            <h3 id="pName">Priya Raman</h3>
+            <div class="muted" id="pSubject" style="font-size: var(--text-label)"></div>
+          </div>
+          <button class="btn btn-icon" id="closePanel" aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="row-flex">
+          <span class="status" id="pStatus"></span>
+        </div>
+        <div>
+          <div class="overline" style="margin-bottom: var(--space-2)">Timeline</div>
+          <ol class="timeline" id="pTimeline"></ol>
+        </div>
+        <div class="tags">
+          <div class="overline">Tags</div>
+          <label class="field">Company<input class="input" value="Acme" /></label>
+          <label class="field">Role
+            <select class="select"><option value="">Not set</option><option>Founder</option><option selected>Hiring manager</option><option>Recruiter</option><option>Other</option></select>
+          </label>
+          <label class="field">Variant<input class="input" id="pVariant" /></label>
+          <div class="row-flex">
+            <button class="btn btn-primary confirm" id="saveTags"><span class="label">Save tags</span><span class="ok"><svg class="icon"><use href="#i-check"/></svg>Saved</span></button>
+            <button class="btn btn-ghost"><svg class="icon"><use href="#i-external"/></svg>Open in Gmail</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ====================== Components ====================== -->
+  <h2 class="section">Components and states</h2>
+  <p class="note">Forced states, left to right. Everything is also live: hover, press and tab through it.</p>
+  <div class="states" id="buttonStates"></div>
+
+  <div class="grid-2" style="margin-top: var(--space-8)">
+    <div class="demo-box">
+      <div class="overline">Inputs</div>
+      <label class="field">Default<input class="input" placeholder="email-tracker.you.workers.dev" /></label>
+      <label class="field">Focus<input class="input is-focus" value="email-tracker.you.workers.dev" /></label>
+      <label class="field">Error<input class="input is-error" value="wrong-secret" /><span class="error">The API secret doesn't match the Worker's API_SECRET.</span></label>
+      <label class="field">Disabled<input class="input" value="Connected as you@gmail.com" disabled /></label>
+    </div>
+    <div class="demo-box">
+      <div class="overline">Switches</div>
+      <label class="row-flex"><button class="switch" role="switch" aria-checked="true" data-switch aria-label="Track by default"></button>Track every email by default</label>
+      <label class="row-flex"><button class="switch" role="switch" aria-checked="false" data-switch aria-label="Notify"></button>Show a notification on open</label>
+      <label class="row-flex faint"><button class="switch" role="switch" aria-checked="false" disabled aria-label="Disabled"></button>Disabled</label>
+      <div class="overline" style="margin-top: var(--space-2)">Compose toggle (inside Gmail)</div>
+      <div class="row-flex">
+        <div class="gmail-bar"><button class="fake-send" tabindex="-1">Send</button><button class="compose-toggle" role="switch" aria-checked="true" data-compose aria-label="Tracking on"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="m3 3 18 18"/></svg></button></div>
+        <div class="gmail-bar"><button class="fake-send" tabindex="-1">Send</button><button class="compose-toggle" role="switch" aria-checked="false" data-reason="never-track" title="Not tracked: a recipient is on your never-track list" aria-label="Not tracked: never-track list"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="m3 3 18 18"/></svg></button></div>
+      </div>
+    </div>
+    <div class="demo-box">
+      <div class="overline">Toast</div>
+      <div class="row-flex">
+        <button class="btn btn-secondary" data-toast="Sent without tracking: the tracker didn't respond.">Tracker unreachable</button>
+        <button class="btn btn-secondary" data-toast="Sent without tracking: couldn't find the email body.">No body</button>
+      </div>
+      <div class="overline">Error banner</div>
+      <div class="banner" role="alert"><svg class="icon"><use href="#i-alert"/></svg><div><strong>Gmail access expired.</strong> Replies and bounces aren't being checked. <button class="btn btn-ghost" style="height: auto; padding: 0; text-decoration: underline">Reconnect Gmail</button></div></div>
+    </div>
+    <div class="demo-box">
+      <div class="overline">Loading</div>
+      <div style="display: grid; gap: var(--space-3)" aria-busy="true" aria-label="Loading emails">
+        <div class="row-flex" style="flex-wrap: nowrap"><div class="skeleton" style="width: var(--stamp-size); height: var(--stamp-size)"></div><div class="skeleton" style="flex: 2"></div><div class="skeleton" style="flex: 3"></div><div class="skeleton" style="flex: 1"></div></div>
+        <div class="row-flex" style="flex-wrap: nowrap"><div class="skeleton" style="width: var(--stamp-size); height: var(--stamp-size)"></div><div class="skeleton" style="flex: 3"></div><div class="skeleton" style="flex: 2"></div><div class="skeleton" style="flex: 1"></div></div>
+        <div class="row-flex" style="flex-wrap: nowrap"><div class="skeleton" style="width: var(--stamp-size); height: var(--stamp-size)"></div><div class="skeleton" style="flex: 2"></div><div class="skeleton" style="flex: 2"></div><div class="skeleton" style="flex: 1"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top: var(--space-6)">
+    <div class="demo-box">
+      <div class="overline">Empty state</div>
+      <div class="empty">
+        <span class="stamp" data-status="not_opened"><svg><use href="#m-check"/></svg></span>
+        <h3>No tracked emails yet</h3>
+        <p>Send an email from Gmail as usual. It will show up here, and you'll see the moment it's opened.</p>
+      </div>
+    </div>
+    <div class="demo-box">
+      <div class="overline">Health cards</div>
+      <div class="health">
+        <div class="card" data-state="ok"><div class="overline">Bounce rate · 7 days</div><div class="value">1.8%</div><div class="verdict"><svg class="icon"><use href="#i-check"/></svg>Healthy, under 3%</div></div>
+        <div class="card" data-state="warning"><div class="overline">Gmail open rate</div><div class="value">21%</div><div class="verdict"><svg class="icon"><use href="#i-alert"/></svg>Down by more than half vs the last 2 weeks: possible spam placement</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== Colour ====================== -->
+  <h2 class="section">Colour</h2>
+  <p class="note">Paper and ink, plus five status inks with washes. There's no brand accent: selection is an inverted ink chip.</p>
+  <div class="swatches" id="swatches"></div>
+
+  <!-- ====================== Type ====================== -->
+  <h2 class="section">Type</h2>
+  <div>
+    <div class="type-row"><span class="overline">Display · serif</span><span class="serif num" style="font-size: var(--text-display); line-height: var(--leading-tight)">62% open rate</span></div>
+    <div class="type-row"><span class="overline">Title · serif</span><span class="serif" style="font-size: var(--text-title); line-height: var(--leading-tight)">Needs follow-up</span></div>
+    <div class="type-row"><span class="overline">Body · 14</span><span>Opened 2h ago from Gmail. No reply yet.</span></div>
+    <div class="type-row"><span class="overline">Label · 13</span><span style="font-size: var(--text-label); font-weight: var(--weight-medium)">Hiring manager · Acme</span></div>
+    <div class="type-row"><span class="overline">Caption · 12</span><span class="num faint" style="font-size: var(--text-caption)">Tue 28 Oct, 14:32:08</span></div>
+    <div class="type-row"><span class="overline">Overline · 11</span><span class="overline">First open</span></div>
+  </div>
+</main>
+
+<div class="toast-host" id="toastHost" aria-live="polite"></div>
+
+<script>
+  const MARK = { not_opened: "m-check", opened: "m-double", opened_uncertain: "m-double", replied: "m-reply", bounced: "m-cross", untracked: "m-dash" };
+  const LABEL = { not_opened: "Not opened", opened: "Opened", opened_uncertain: "Opened (uncertain)", replied: "Replied", bounced: "Bounced", untracked: "Untracked" };
+  const DESC = { not_opened: "Sent, no open yet", opened: "Gmail opened it", opened_uncertain: "Apple Mail may preload", replied: "Strongest signal", bounced: "Address not found", untracked: "Sent without a pixel" };
+
+  function stampHTML(status, landing) {
+    return `<span class="stamp${landing ? " is-landing" : ""}" data-status="${status}" role="img" aria-label="${LABEL[status]}"><svg><use href="#${MARK[status]}"/></svg></span>`;
+  }
+  function land(el) { el.classList.remove("is-landing"); void el.offsetWidth; el.classList.add("is-landing"); }
+
+  // ---- Signature grid
+  const grid = document.getElementById("stampGrid");
+  grid.innerHTML = Object.keys(LABEL).map((s) =>
+    `<button class="btn btn-ghost" style="height:auto;padding:var(--space-2);justify-content:flex-start" data-replay>${stampHTML(s)}<span style="display:grid;text-align:left"><span style="color:var(--ink)">${LABEL[s]}</span><span class="faint" style="font-size:var(--text-caption);font-weight:var(--weight-regular)">${DESC[s]}</span></span></button>`).join("");
+  grid.addEventListener("click", (e) => { const b = e.target.closest("[data-replay]"); if (b) land(b.querySelector(".stamp")); });
+
+  // ---- Sliding inverted chips
+  function placeIndicator(group) {
+    const ind = group.querySelector(".indicator");
+    const active = group.querySelector('[aria-selected="true"], [aria-checked="true"]');
+    if (!ind || !active) return;
+    ind.style.width = active.offsetWidth + "px";
+    ind.style.transform = `translateX(${active.offsetLeft}px)`;
+  }
+  document.querySelectorAll("[data-chips]").forEach((group) => {
+    const attr = group.getAttribute("role") === "tablist" ? "aria-selected" : "aria-checked";
+    group.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip"); if (!chip) return;
+      group.querySelectorAll(".chip").forEach((c) => c.setAttribute(attr, String(c === chip)));
+      placeIndicator(group);
+      group.dispatchEvent(new CustomEvent("change", { detail: chip }));
+    });
+    placeIndicator(group);
+  });
+  addEventListener("resize", () => document.querySelectorAll("[data-chips]").forEach(placeIndicator));
+  document.fonts?.ready.then(() => document.querySelectorAll("[data-chips]").forEach(placeIndicator));
+
+  // ---- Theme + reduced motion
+  const root = document.documentElement;
+  document.querySelector('[aria-label="Theme"]').addEventListener("change", (e) => {
+    const t = e.detail.dataset.themeChoice;
+    if (t === "system") delete root.dataset.theme; else root.dataset.theme = t;
+    buildSwatches();
+  });
+  function bindSwitch(sw, onChange) {
+    sw.addEventListener("click", () => { const on = sw.getAttribute("aria-checked") !== "true"; sw.setAttribute("aria-checked", String(on)); onChange?.(on); });
+  }
+  bindSwitch(document.getElementById("reduceMotion"), (on) => { if (on) root.dataset.motion = "reduce"; else delete root.dataset.motion; });
+  document.querySelectorAll("[data-switch]").forEach((s) => bindSwitch(s));
+  document.querySelectorAll("[data-compose]").forEach((s) => bindSwitch(s, (on) => s.setAttribute("aria-label", on ? "Tracking on" : "Tracking off for this email")));
+
+  const ms = (name) => parseFloat(getComputedStyle(root).getPropertyValue(name)) || 0;
+
+  // ---- Ledger rows
+  const now = Date.now();
+  const H = 3600e3;
+  const people = [
+    { name: "Priya Raman", email: "priya@acme.io", company: "Acme", subject: "Quick question about the platform role", sent: now - 5 * H, status: "opened", open: now - 3 * H },
+    { name: "Marcus Lee", email: "marcus@linear.app", company: "Linear", subject: "Design engineer, a short note", sent: now - 26 * H, status: "replied", open: now - 24 * H },
+    { name: "Hana Sato", email: "hana@monzo.co.uk", company: "Monzo", subject: "Quick question about the platform role", sent: now - 30 * H, status: "opened_uncertain", open: now - 29.8 * H },
+    { name: "Daniel Ortiz", email: "dortiz@stripe.com", company: "Stripe", subject: "Payments infra, my notes on your API", sent: now - 50 * H, status: "not_opened", open: null },
+    { name: "Aisha Khan", email: "aisha@vercel.com", company: "Vercel", subject: "Following up: frontend platform", sent: now - 74 * H, status: "bounced", open: null },
+    { name: "Tom Becker", email: "tom@gmail.com", company: "", subject: "Coffee next week?", sent: now - 96 * H, status: "untracked", open: null },
+  ];
+  const rel = (t) => { const h = (now - t) / H; return h < 1 ? `${Math.round(h * 60)}m ago` : h < 24 ? `${Math.round(h)}h ago` : `${Math.round(h / 24)}d ago`; };
+  const exact = (t) => new Date(t).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const tbody = document.getElementById("rows");
+  function renderRows() {
+    tbody.innerHTML = people.map((p, i) => `
+      <tr data-i="${i}" tabindex="0" aria-selected="false">
+        <td><span class="status">${stampHTML(p.status)}<span class="label">${LABEL[p.status]}</span></span></td>
+        <td class="who">${p.name}<small>${p.company || p.email}</small></td>
+        <td class="subject">${p.subject}</td>
+        <td class="time"><time title="${exact(p.sent)}">${rel(p.sent)}</time></td>
+        <td class="time">${p.open ? `<time title="${exact(p.open)}">${rel(p.open)}</time>` : '<span class="faint">—</span>'}</td>
+        <td class="actions"><span class="row-flex" style="flex-wrap:nowrap;gap:var(--space-1)"><button class="btn btn-icon" aria-label="Open in Gmail"><svg class="icon"><use href="#i-external"/></svg></button><button class="btn btn-icon" aria-label="Delete"><svg class="icon"><use href="#i-trash"/></svg></button></span></td>
+      </tr>`).join("");
+  }
+  renderRows();
+
+  // ---- Side panel
+  const panel = document.getElementById("panel");
+  let current = null;
+  function openPanel(i) {
+    const p = people[i]; current = i;
+    tbody.querySelectorAll("tr").forEach((tr) => tr.setAttribute("aria-selected", String(+tr.dataset.i === i)));
+    document.getElementById("pCompany").textContent = p.company || "No company";
+    document.getElementById("pName").textContent = p.name;
+    document.getElementById("pSubject").textContent = p.subject;
+    document.getElementById("pVariant").value = p.subject;
+    document.getElementById("pStatus").innerHTML = `${stampHTML(p.status)}<span class="label">${LABEL[p.status]}${p.open ? ` · ${rel(p.open)}` : ""}</span>`;
+    const ev = [`<li>${stampHTML("not_opened")}<span>Sent to ${p.email}</span><time>${exact(p.sent)}</time></li>`];
+    if (p.status !== "untracked" && p.status !== "bounced") ev.push(`<li>${stampHTML("untracked")}<span class="faded">Your own view (ignored)</span><time>${exact(p.sent + 60e3 * 2)}</time></li>`);
+    if (p.open) ev.push(`<li>${stampHTML(p.status === "opened_uncertain" ? "opened_uncertain" : "opened")}<span>${p.status === "opened_uncertain" ? "Opened, Apple Mail (uncertain)" : "Opened, Gmail"}</span><time>${exact(p.open)}</time></li>`);
+    if (p.status === "replied") ev.push(`<li>${stampHTML("replied")}<span>Replied</span><time>${exact(p.open + 2 * H)}</time></li>`);
+    if (p.status === "bounced") ev.push(`<li>${stampHTML("bounced")}<span>Bounced: address not found</span><time>${exact(p.sent + 60e3)}</time></li>`);
+    document.getElementById("pTimeline").innerHTML = ev.join("");
+    panel.classList.add("is-open"); panel.setAttribute("aria-hidden", "false");
+  }
+  function closePanel() {
+    panel.classList.remove("is-open"); panel.setAttribute("aria-hidden", "true"); current = null;
+    tbody.querySelectorAll("tr").forEach((tr) => tr.setAttribute("aria-selected", "false"));
+  }
+  tbody.addEventListener("click", (e) => { if (e.target.closest(".actions")) return; const tr = e.target.closest("tr"); if (tr) openPanel(+tr.dataset.i); });
+  tbody.addEventListener("keydown", (e) => { if (e.key === "Enter") { const tr = e.target.closest("tr"); if (tr) openPanel(+tr.dataset.i); } });
+  document.getElementById("closePanel").addEventListener("click", closePanel);
+  addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
+
+  // Confirm swap on save
+  const save = document.getElementById("saveTags");
+  let saveTimer;
+  save.addEventListener("click", () => {
+    clearTimeout(saveTimer); save.classList.remove("is-confirmed"); void save.offsetWidth; save.classList.add("is-confirmed");
+    saveTimer = setTimeout(() => save.classList.remove("is-confirmed"), ms("--duration-confirm"));
+  });
+
+  // ---- Live update: stamp lands, row washes
+  document.getElementById("simulate").addEventListener("click", () => {
+    const i = people.findIndex((p) => p.status === "not_opened");
+    const target = i >= 0 ? i : 0;
+    const p = people[target];
+    p.status = i >= 0 ? "opened" : (p.status === "opened" ? "replied" : "opened");
+    p.open = p.open ?? Date.now();
+    const tr = tbody.querySelector(`tr[data-i="${target}"]`);
+    tr.cells[0].innerHTML = `<span class="status">${stampHTML(p.status, true)}<span class="label">${LABEL[p.status]}</span></span>`;
+    tr.cells[4].innerHTML = `<time title="${exact(p.open)}">just now</time>`;
+    tr.classList.add("is-live");
+    setTimeout(() => tr.classList.remove("is-live"), ms("--duration-confirm"));
+    if (current === target) openPanel(target);
+    if (i < 0) people.forEach((q, k) => { if (k !== target && q.status === "opened") q.status = "not_opened"; });
+  });
+
+  // Sync button: loading state
+  const sync = document.getElementById("syncBtn");
+  sync.addEventListener("click", () => {
+    sync.disabled = true; const icon = sync.querySelector("svg"); const spinner = document.createElement("span"); spinner.className = "spinner";
+    icon.replaceWith(spinner); sync.querySelector("span:last-child").textContent = "Checking";
+    setTimeout(() => { spinner.replaceWith(icon); sync.querySelector("span:last-child").textContent = "Check now"; sync.disabled = false; }, 1200);
+  });
+
+  // Tab content swap
+  const view = document.getElementById("view");
+  document.querySelector('[aria-label="Views"]').addEventListener("change", () => {
+    view.classList.add("is-swapping"); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove("is-swapping")));
+  });
+
+  // ---- Toasts
+  const host = document.getElementById("toastHost");
+  document.querySelectorAll("[data-toast]").forEach((b) => b.addEventListener("click", () => {
+    const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status");
+    t.innerHTML = `<span class="dot" aria-hidden="true"></span>${b.dataset.toast}`;
+    host.appendChild(t); requestAnimationFrame(() => t.classList.add("is-in"));
+    setTimeout(() => { t.classList.remove("is-in"); setTimeout(() => t.remove(), ms("--duration-exit") + 50); }, 3600);
+  }));
+
+  // ---- Button state matrix
+  const states = ["Default", "Hover", "Pressed", "Focus", "Disabled", "Loading"];
+  const kinds = [["Primary", "btn-primary", "Save tags"], ["Secondary", "btn-secondary", "Check now"], ["Ghost", "btn-ghost", "Open in Gmail"], ["Icon", "btn-icon", ""]];
+  const cls = { Hover: "is-hover", Pressed: "is-pressed is-hover", Focus: "is-focus", Disabled: "is-disabled" };
+  let html = `<span></span>` + states.map((s) => `<span class="overline">${s}</span>`).join("");
+  for (const [name, k, label] of kinds) {
+    html += `<span class="overline">${name}</span>`;
+    for (const s of states) {
+      const content = s === "Loading" ? `<span class="spinner"></span>${label ? "Saving" : ""}` : (k === "btn-icon" ? `<svg class="icon"><use href="#i-trash"/></svg>` : label);
+      html += `<span><button class="btn ${k} ${cls[s] || ""}" ${s === "Disabled" || s === "Loading" ? "disabled" : ""} aria-label="${name} ${s}">${content}</button></span>`;
+    }
+  }
+  document.getElementById("buttonStates").innerHTML = html;
+
+  // ---- Swatches (values read live from tokens.css)
+  const SWATCHES = ["--paper", "--paper-raised", "--paper-sunken", "--ink", "--ink-muted", "--ink-faint", "--rule", "--rule-strong",
+    "--ink-opened", "--ink-opened-wash", "--ink-replied", "--ink-replied-wash", "--ink-uncertain", "--ink-uncertain-wash", "--ink-bounced", "--ink-bounced-wash", "--ink-pending", "--ink-pending-wash"];
+  function buildSwatches() {
+    const cs = getComputedStyle(root);
+    document.getElementById("swatches").innerHTML = SWATCHES.map((v) =>
+      `<div class="swatch"><div class="chipcol" style="background: var(${v})"></div><div><span>${v.slice(2)}</span><code>${cs.getPropertyValue(v).trim()}</code></div></div>`).join("");
+  }
+  buildSwatches();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", buildSwatches);
+</script>
+</body>
+</html>

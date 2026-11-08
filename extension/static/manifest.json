@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Email Tracker",
+  "version": "0.1.0",
+  "description": "Private open tracking for emails sent from Gmail.",
+  "permissions": [
+    "notifications",
+    "storage",
+    "alarms",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://*.workers.dev/*",
+    "https://mail.google.com/*",
+    "https://gmail.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Email Tracker dashboard"
+  },
+  "options_page": "settings.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "gmail.js"
+      ],
+      "css": [
+        "gmail.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.readonly"
+    ]
+  }
+}

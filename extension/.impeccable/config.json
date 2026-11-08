@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-28T09:56:30.404Z",
+        "reason": "design/DESIGN.md (design-grill output) specifies Inter Tight as --font-sans; dashboard bundles it per that system"
+      }
+    ]
+  }
+}

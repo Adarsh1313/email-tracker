@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "design/system.html"
+        ],
+        "createdAt": "2026-10-28T09:44:44.094Z",
+        "reason": "Claude: flagged pair is selected-chip text (--on-ink) measured against the group background; it actually sits on the absolutely positioned ink indicator (~13:1). Real faint-ink contrast was fixed in tokens.css."
+      }
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+/* Placeholder styling inside Gmail. Real tokens and motion arrive with
+   design/ (spec slice 6) and the polish pass (slice 12). */
+
+.et-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  margin-inline-start: 0.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 150ms ease-out, transform 100ms ease-out;
+}
+
+.et-toggle::before {
+  content: "◉";
+  font-size: 1rem;
+}
+
+.et-toggle[aria-checked="true"] {
+  opacity: 1;
+}
+
+.et-toggle[aria-checked="false"]::before {
+  content: "⊘";
+}
+
+.et-toggle:active {
+  transform: scale(0.94);
+}
+
+.et-banner {
+  margin-inline-start: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, CanvasText 10%, Canvas);
+  font: 500 0.75rem/1.4 system-ui, sans-serif;
+}
+
+.et-toast {
+  position: fixed;
+  inset-block-end: 1.5rem;
+  inset-inline-start: 50%;
+  z-index: 2147483647;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background: CanvasText;
+  color: Canvas;
+  font: 500 0.875rem/1.4 system-ui, sans-serif;
+  opacity: 0;
+  transform: translate(-50%, 0.5rem);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+.et-toast--in {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .et-toggle,
+  .et-toast {
+    transition: none;
+  }
+}
+
+.et-chip {
+  margin-inline-start: 0.5rem;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 0.375rem;
+  background: color-mix(in srgb, CanvasText 8%, Canvas);
+  font: 500 0.6875rem/1.5 system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.et-chip[data-status="opened"] { color: #2f6b47; }
+.et-chip[data-status="replied"] { color: #3d4a9e; }
+.et-chip[data-status="opened_uncertain"] { color: #8f600e; }
+.et-chip[data-status="bounced"] { color: #a33d2b; }
+
+.et-split {
+  margin-inline-start: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font: 500 0.75rem/1.4 system-ui, sans-serif;
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.et-split[aria-checked="true"] {
+  opacity: 1;
+  background: color-mix(in srgb, CanvasText 12%, Canvas);
+}

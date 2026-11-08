@@ -1,0 +1,48 @@
+/* Settings page. Builds on dashboard.css; every value comes from tokens.css. */
+
+.settings { max-width: calc(var(--prose-max) * 2); }
+.block { display: grid; gap: var(--space-3); padding-block: var(--space-6); border-top: var(--hairline) solid var(--rule); }
+.block > h2 { margin-bottom: var(--space-1); }
+.block p { margin: 0; }
+.narrow { width: calc(var(--control-height) * 3); }
+.area { height: auto; padding: var(--space-2) var(--space-3); line-height: var(--leading-body); resize: vertical; width: 100%; }
+.save-bar { padding-top: var(--space-4); border-top: var(--hairline) solid var(--rule); }
+
+/* Setup checklist: a ledger of checks, each with a stamp-style mark. */
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; }
+.check { display: grid; grid-template-columns: auto 1fr; gap: var(--space-3); align-items: start; padding-block: var(--space-2); border-bottom: var(--hairline) solid var(--rule); }
+.check .stamp { margin-top: var(--space-1); }
+.check-label { font-size: var(--text-label); font-weight: var(--weight-medium); }
+.check-fix { display: block; margin-top: var(--space-1); font-size: var(--text-caption); color: var(--ink-muted); }
+.check[data-state="failed"] .check-fix { color: var(--ink-bounced); }
+.check .optional { color: var(--ink-faint); font-weight: var(--weight-regular); }
+
+.walkthrough { font-size: var(--text-label); color: var(--ink-muted); }
+.walkthrough summary { cursor: pointer; color: var(--ink); font-weight: var(--weight-medium); }
+.walkthrough ol { margin: var(--space-2) 0; padding-left: var(--space-5); display: grid; gap: var(--space-1); }
+.walkthrough code { font-size: var(--text-caption); background: var(--paper-sunken); padding: 0 var(--space-1); border-radius: var(--radius-control); overflow-wrap: anywhere; }
+
+/* Switch row */
+.switch-row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); font-size: var(--text-body); }
+.switch-row small { display: block; margin-top: var(--space-1); font-size: var(--text-caption); }
+.switch {
+  appearance: none; flex: none; position: relative; cursor: pointer; margin: 0;
+  width: var(--switch-width); height: var(--switch-height); border-radius: var(--radius-round);
+  background: var(--rule-strong); border: 0;
+  transition: background-color var(--duration-move) var(--ease-colour);
+}
+.switch::after {
+  content: ""; position: absolute; top: 50%; left: calc((var(--switch-height) - var(--switch-knob)) / 2);
+  width: var(--switch-knob); height: var(--switch-knob); border-radius: var(--radius-round); background: var(--paper-raised);
+  transform: translateY(-50%);
+  transition: left var(--duration-move) var(--ease-out), width var(--duration-hover) var(--ease-out);
+}
+.switch:active::after { width: var(--switch-knob-held); }
+.switch:checked { background: var(--ink); }
+.switch:checked::after { left: calc(var(--switch-width) - var(--switch-knob) - (var(--switch-height) - var(--switch-knob)) / 2); }
+.switch:checked:active::after { left: calc(var(--switch-width) - var(--switch-knob-held) - (var(--switch-height) - var(--switch-knob)) / 2); }
+
+/* Destructive actions: brick text; the label says what it does, so colour is never the only signal. */
+.danger-btn { color: var(--ink-bounced); }
+@media (hover: hover) { .danger-btn:not(:disabled):hover { background: var(--ink-bounced-wash); color: var(--ink-bounced); } }
+output.is-error { color: var(--ink-bounced); }
