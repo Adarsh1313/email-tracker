@@ -182,6 +182,11 @@ gmailButton.addEventListener("click", async () => {
 
 // ---------- Privacy ----------
 
+document.querySelector("#removeDemo")!.addEventListener("click", async () => {
+  const n = await db.removeDemo();
+  say(out("privacyResult"), n ? `Removed ${n} demo emails. Your real data is untouched.` : "No demo data found.");
+});
+
 document.querySelector("#deleteLocal")!.addEventListener("click", async () => {
   if (!confirm("Delete all emails, opens and notes stored in this browser? Settings are kept. This can't be undone.")) return;
   await db.clearAll();

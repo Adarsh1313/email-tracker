@@ -43,7 +43,7 @@ npm run setup
 
 Then open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and pick `extension/dist`. Open the extension's Settings and press **Send a test email**: the last check turns green when the open arrives.
 
-Want to look around first? `npm run demo-data` loads about 20 fake emails (opens, replies, a bounce) into the dashboard. Remove them with **Delete all my local data**.
+Want to look around first? `npm run demo-data` loads about 20 fake emails (opens, replies, a bounce) into the dashboard. Remove them with **Remove demo data** in Settings.
 
 Reply and bounce detection is optional and off by default. Settings has a walkthrough that shows your extension ID for the Google Cloud OAuth client. The manual, step-by-step version of everything is in [docs/setup-guide.md](docs/setup-guide.md).
 

@@ -109,6 +109,19 @@ export const db = {
       tx.onerror = () => reject(tx.error);
     });
   },
+  /** Removes only the fake records from `npm run demo-data` (emails with ids "demo-…", opens with negative ids). Returns how many emails went. */
+  async removeDemo(): Promise<number> {
+    const emails = (await this.allEmails()).filter((e) => e.id.startsWith("demo-"));
+    const tx = (await open()).transaction(["emails", "opens", "overrides"], "readwrite");
+    for (const e of emails) tx.objectStore("emails").delete(e.id);
+    tx.objectStore("opens").delete(IDBKeyRange.upperBound(-1));
+    tx.objectStore("overrides").delete(IDBKeyRange.upperBound(-1));
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    return emails.length;
+  },
   async getMeta<T>(key: string): Promise<T | undefined> {
     return done((await store("meta")).get(key));
   },

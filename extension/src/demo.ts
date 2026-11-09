@@ -1,6 +1,6 @@
 // Demo data: `npm run demo-data` writes dist/demo-data.json. The dashboard imports
-// it once per file (by id). Demo records have ids starting "demo-"; "Delete all my
-// local data" in Settings removes them.
+// it once per file (by id). Demo records have ids starting "demo-"; "Remove demo
+// data" in Settings deletes just those.
 import type { OpenEvent, TrackedEmail } from "./core/types";
 import { db } from "./db";
 
